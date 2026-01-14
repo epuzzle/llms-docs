@@ -31,6 +31,8 @@ All examples below are canonical and must be followed exactly.
 - Avoid nullable types unless strictly required by existing contracts.
 - Methods must be short and intention-revealing.
 - No fluent APIs unless already used in the codebase.
+- Maximum line length is 120.
+- Only one enter (new line) symbol at the end of class files.
 
 ---
 
