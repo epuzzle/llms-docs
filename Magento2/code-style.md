@@ -5,8 +5,6 @@ Deviation from these rules is a failure.
 
 All examples below are canonical and must be followed exactly.
 
----
-
 ## Architecture
 - Use Magento 2 Service Contracts.
 - Always define an interface first.
@@ -23,8 +21,6 @@ All examples below are canonical and must be followed exactly.
 - AdminUi modules may only orchestrate and call existing services.
 - The Magento module name MUST end with `AdminUi` (module.xml / registration.php).
 
----
-
 ## PHP Rules
 - Always use `declare(strict_types=1);`
 - All method arguments and return values must be explicitly typed.
@@ -34,7 +30,22 @@ All examples below are canonical and must be followed exactly.
 - Maximum line length is 120.
 - Only one enter (new line) symbol at the end of class files.
 
----
+## JavaScript Rules
+
+### Architectural Principles
+- **Encapsulation**: Components must be self-contained. Communication must occur strictly via events, `customerData` observables, or declarative `imports`/`listens` wiring in the component configuration.
+- **Minimalism**: Code must be simple and readable by design. Comments are considered exceptions; code should be self-explanatory through naming and structure.
+- **English Language**: Any necessary comments must be written exclusively in English.
+- **No Global Scope**: Do not attach custom objects to the `window` or `document` scope.
+- **Logic Separation**: Business logic must reside in PHP Services, not in JS. JS components are strictly for UI orchestration.
+
+### Implementation Standards
+- **AMD Modules**: All JS files must be wrapped in `define([...], function (...) { 'use strict'; ... });`.
+- **Initialization**: Always call `this._super()` within `initialize()`. Event listeners must be attached using `.bind(this)` to maintain context.
+- **Naming**:
+  - Public methods: `camelCase`.
+  - Event handlers: Must end with the `Handle` suffix (e.g., `updateCartHandle`).
+- **Data Binding**: Favor `defaults` and `tracks` for reactive properties. Direct DOM manipulation is forbidden; use Knockout templates and bindings.
 
 ## Naming Conventions
 - Interfaces: `SomethingInterface`
@@ -42,8 +53,6 @@ All examples below are canonical and must be followed exactly.
 - Methods: `getX()`, `setX()`
 - No abbreviations.
 - Names must reflect responsibility precisely.
-
----
 
 ## Data Handling
 - Use `getData()` / `setData()` patterns consistently.
@@ -53,15 +62,11 @@ All examples below are canonical and must be followed exactly.
 - Magento Service Contract Data Interfaces ARE allowed and expected.
 - Custom DTO classes (separate data carriers) are FORBIDDEN unless an identical pattern already exists in the codebase.
 
----
-
 ## Dependency Injection
 - All dependencies must be injected via constructor.
 - DI wiring must be defined in `di.xml` (preferences, virtualTypes, plugins, arguments).
 - Use other Magento `etc/*` XML files only for their intended purpose (webapi.xml, acl.xml, events.xml, etc.).
 - No runtime resolution, no optional dependencies, no fallback logic.
-
----
 
 ## XML (di.xml)
 - Keep XML minimal and explicit.
@@ -69,21 +74,15 @@ All examples below are canonical and must be followed exactly.
 - Do not add unused or speculative configuration.
 - XML must stay in sync with PHP classes.
 
----
-
 ## Rule of Similarity
 - Before implementing anything, find the closest existing example.
 - Copy structure, naming, visibility, and style from that example.
 - If no close example exists, stop and ask one clarifying question.
 
----
-
 ## Absolute Rule
 If a requested change violates these rules:
 - DO NOT implement the change.
 - Stop and explain exactly which rule is violated and why.
-
----
 
 ## Forbidden Patterns
 - Introducing new architectural layers.
@@ -91,8 +90,6 @@ If a requested change violates these rules:
 - Renaming existing public APIs.
 - Adding abstractions "for future use".
 - Explaining instead of implementing.
-
----
 
 ## Examples
 Examples below are canonical; copy structure, docblocks, and naming exactly.
@@ -597,4 +594,52 @@ ComponentRegistrar::register(
     __DIR__
 );
 
+```
+
+#### Canonical JS Component Example
+```javascript
+define([
+    'uiComponent',
+    'Magento_Customer/js/customer-data'
+], function (Component, customerData) {
+    'use strict';
+  
+    return Component.extend({
+        defaults: {
+            tracks: {
+                cartData: true
+            },
+            cartData: {}
+        },
+
+        /**
+         * @inheritDoc
+         */
+        initialize() {
+            this._super();
+            this.initializeSubscriptions();
+      
+            return this;
+        },
+
+        /**
+         * Initialize the list of subscriptions
+         *
+         * @returns {void}
+         */
+        initializeSubscriptions() {
+            customerData.get('cart').subscribe(this.updateCartHandle.bind(this));
+        },
+
+        /**
+         * Updates the cart handle
+         *
+         * @param {Object} cart
+         * @returns {void}
+         */
+        updateCartHandle(cart) {
+            this.cartData = cart;
+        }
+    });
+});
 ```
