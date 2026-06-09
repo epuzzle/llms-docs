@@ -30,22 +30,32 @@ All examples below are canonical and must be followed exactly.
 - Maximum line length is 120.
 - Only one enter (new line) symbol at the end of class files.
 
-## JavaScript Rules
+## JavaScript Rules (Magento 2 / Adobe Commerce)
 
 ### Architectural Principles
-- **Encapsulation**: Components must be self-contained. Communication must occur strictly via events, `customerData` observables, or declarative `imports`/`listens` wiring in the component configuration.
-- **Minimalism**: Code must be simple and readable by design. Comments are considered exceptions; code should be self-explanatory through naming and structure.
-- **English Language**: Any necessary comments must be written exclusively in English.
-- **No Global Scope**: Do not attach custom objects to the `window` or `document` scope.
-- **Logic Separation**: Business logic must reside in PHP Services, not in JS. JS components are strictly for UI orchestration.
+- **Component Encapsulation**: Components must be self-contained. Interaction via `uiRegistry` is strictly forbidden. Use declarative `imports` and `listens` in component `defaults`, `customerData` observables, or standard DOM/Custom events for cross-component communication.
+- **Minimalism**: Code must be simple and readable by design. Comments are exceptions; code must be self-explanatory through naming and structure. If documentation is strictly necessary, it must be written in English.
+- **Logic Separation**: Business logic must reside in PHP Service Contracts. JS components are strictly limited to UI orchestration, event handling, and data binding.
+- **Global Scope**: Attaching custom objects to `window` or `document` is forbidden, with the sole exception of read-only Config Providers for non-cacheable data.
+- **Code Maintenance**: If a component exceeds 200 lines, it must be refactored into smaller, specialized components.
 
 ### Implementation Standards
 - **AMD Modules**: All JS files must be wrapped in `define([...], function (...) { 'use strict'; ... });`.
-- **Initialization**: Always call `this._super()` within `initialize()`. Event listeners must be attached using `.bind(this)` to maintain context.
-- **Naming**:
-  - Public methods: `camelCase`.
-  - Event handlers: Must end with the `Handle` suffix (e.g., `updateCartHandle`).
-- **Data Binding**: Favor `defaults` and `tracks` for reactive properties. Direct DOM manipulation is forbidden; use Knockout templates and bindings.
+- **Syntax and Style**:
+  - Always resolve jQuery as `$` in the `define` block and use `$` throughout the file.
+  - Use ES6+ method shorthand syntax (e.g., `methodName() { ... }`) for all methods. The `function` keyword for methods is strictly forbidden.
+  - Public methods must use `camelCase`.
+  - Event handlers must end with the `Handle` suffix (e.g., `updateCartHandle`).
+- **Initialization**: Always call `this._super()` in `initialize()`. Event listeners must be attached using `.bind(this)` to maintain context.
+- **Data Binding**: Favor `defaults` and `tracks` for reactive properties. Direct DOM manipulation is forbidden; use Knockout.js templates and bindings.
+- **Mixins**: When extending a widget, always use a descriptive variable name for the original widget object (e.g., `authnetcimAcceptjsWidget`) instead of generic placeholders.
+
+### Absolute Rules (MUST FOLLOW)
+- **NO `uiRegistry`**: Direct lookups are prohibited.
+- **NO Global Logic**: Do not store state or logic-carrying objects in the global scope.
+- **NO Russian Comments**: Documentation must be exclusively in English.
+- **NO `function` keyword for methods**: Strictly use `methodName() {}` syntax.
+- **NO jQuery namespace**: Always resolve as `$` in the `define` block.
 
 ## Naming Conventions
 - Interfaces: `SomethingInterface`
